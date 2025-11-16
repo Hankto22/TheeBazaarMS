@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout.js';
 import DemoBanner from './components/DemoBanner.tsx';
+import IOSInstallPrompt from './components/IOSInstallPrompt.js';
 import Carwash from './pages/Carwash.tsx';
 import WashHistory from './pages/WashHistory.tsx';
 import Customers from './pages/Customers.tsx';
@@ -12,12 +13,25 @@ import Inventory from './pages/Inventory.tsx';
 import Staff from './pages/Staff.tsx';
 import Settings from './pages/Settings.tsx';
 import reportWebVitals from './reportWebVitals.js';
+import { syncPendingChanges } from './api/syncService';
 import './App.css';
 
 function App() {
+  useEffect(() => {
+    syncPendingChanges(); // on load
+
+    const handler = () => {
+      syncPendingChanges();
+    };
+
+    window.addEventListener('online', handler);
+    return () => window.removeEventListener('online', handler);
+  }, []);
+
   return (
     <Router>
       <DemoBanner />
+      <IOSInstallPrompt />
       <Layout>
         <Routes>
           <Route path="/" element={<Carwash />} />

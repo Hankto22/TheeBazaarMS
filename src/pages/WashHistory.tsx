@@ -35,8 +35,8 @@ export default function WashHistory() {
         getCustomers(),
       ]);
       setHistory(historyRes.data);
-      setServices(servicesRes.data);
-      setCustomers(customersRes.data);
+      setServices(servicesRes);
+      setCustomers(customersRes);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {

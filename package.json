@@ -1,7 +1,6 @@
 {
   "name": "frontend",
   "version": "0.1.0",
-  "type": "module",
   "private": true,
   "dependencies": {
     "@testing-library/dom": "^10.4.1",
@@ -30,6 +29,7 @@
     "dev": "react-scripts start",
     "demo": "cross-env REACT_APP_DEMO_MODE=true REACT_APP_THEME=dark REACT_APP_OVERLAY=frosted react-scripts start",
     "build": "cross-env DISABLE_ESLINT_PLUGIN=true react-scripts build",
+    "lint": "eslint src --resolve-plugins-relative-to node_modules",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -37,8 +37,10 @@
     "extends": [
       "react-app",
       "react-app/jest"
-    ]
+    ],
+    "plugins": ["react"]
   },
+  "proxy": "http://localhost:5000",
   "browserslist": {
     "production": [
       ">0.2%",
@@ -56,6 +58,7 @@
     "autoprefixer": "^10.4.21",
     "cross-env": "^10.1.0",
     "daisyui": "^4.12.10",
+    "eslint-plugin-react": "^7.37.5",
     "tailwindcss": "^3.4.0"
   }
 }

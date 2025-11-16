@@ -1,0 +1,4 @@
+[
+  { "id": "demo-customer-1", "name": "Jane Doe", "phone": "0712345678", "loyaltyPoints": 0, "loyaltyTier": "Bronze", "createdAt": "2023-01-01T00:00:00.000Z" },
+  { "id": "demo-customer-2", "name": "John Smith", "phone": "0798765432", "loyaltyPoints": 0, "loyaltyTier": "Bronze", "createdAt": "2023-01-01T00:00:00.000Z" }
+]

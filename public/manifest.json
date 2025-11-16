@@ -9,14 +9,14 @@
       "type": "image/x-icon"
     },
     {
-      "src": "logo192.png",
-      "type": "image/png",
+      "src": "logo192.jpeg",
+      "type": "image/jpeg",
       "sizes": "192x192",
       "purpose": "any maskable"
     },
     {
-      "src": "logo512.png",
-      "type": "image/png",
+      "src": "logo512.jpeg",
+      "type": "image/jpeg",
       "sizes": "512x512",
       "purpose": "any maskable"
     }
@@ -35,14 +35,14 @@
       "short_name": "New Wash",
       "description": "Record a new car wash",
       "url": "/?action=new-wash",
-      "icons": [{ "src": "logo192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "logo192.jpeg", "sizes": "192x192" }]
     },
     {
       "name": "Reports",
       "short_name": "Reports",
       "description": "View analytics and reports",
       "url": "/reports",
-      "icons": [{ "src": "logo192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "logo192.jpeg", "sizes": "192x192" }]
     }
   ]
 }

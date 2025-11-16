@@ -1,0 +1,4 @@
+[
+  { "id": "demo-service-1", "name": "Exterior Wash", "price": 300, "duration": 30, "createdAt": "2023-01-01T00:00:00.000Z" },
+  { "id": "demo-service-2", "name": "Interior Vacuum", "price": 250, "duration": 20, "createdAt": "2023-01-01T00:00:00.000Z" }
+]

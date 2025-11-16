@@ -126,61 +126,18 @@ const api = axios.create({
 // Initialize IndexedDB
 initDB();
 
-// Enhanced API functions with offline support
-const createOfflineAwareApi = (originalApi: typeof api) => {
-  return new Proxy(originalApi, {
-    get(target, prop) {
-      const originalMethod = target[prop as keyof typeof api] as any;
-      if (typeof originalMethod === 'function') {
-        return async (...args: any[]) => {
-          try {
-            const result = await (originalMethod.apply(target, args) as Promise<any>);
-            // Cache successful responses
-            if (prop === 'get') {
-              const endpoint = args[0];
-              if (endpoint.includes('/services')) {
-                await cacheData('services', result.data);
-              } else if (endpoint.includes('/customers')) {
-                await cacheData('customers', result.data);
-              } else if (endpoint.includes('/inventory')) {
-                await cacheData('inventory', result.data);
-              } else if (endpoint.includes('/staff')) {
-                await cacheData('staff', result.data);
-              } else if (endpoint.includes('/promos')) {
-                await cacheData('promos', result.data);
-              }
-            }
-            return result;
-          } catch (error) {
-            if (!isOnline() && prop === 'post') {
-              // Save to offline storage for later sync
-              const endpoint = args[0];
-              const data = args[1];
-              if (endpoint.includes('/record')) {
-                return { data: await saveOfflineTransaction({ endpoint, data }) };
-              }
-            }
-            throw error;
-          }
-        };
-      }
-      return originalMethod;
-    }
-  });
-};
-
-const offlineApi = createOfflineAwareApi(api);
+// Use raw API instance to ensure baseURL works correctly
+const offlineApi = api;
 
 // Offline-aware API functions
-export const getServices = async (): Promise<{ data: Service[] }> => {
+export const getServices = async (): Promise<Service[]> => {
   try {
-    return await offlineApi.get('/carwash/services');
-  } catch (error) {
-    if (!isOnline()) {
-      const cached = await getAllFromIndexedDB('services');
-      return { data: cached };
-    }
-    throw error;
+    const res = await api.get('/carwash/services');
+    return res.data;
+  } catch (err) {
+    console.warn('API failed, loading demo services');
+    const fallback = await fetch('/demo-data/services.json');
+    return await fallback.json();
   }
 };
 
@@ -198,15 +155,14 @@ export const recordWash = async (data: any) => {
 
 export const getWashHistory = (): Promise<{ data: Transaction[] }> => offlineApi.get('/carwash/history');
 
-export const getCustomers = async (): Promise<{ data: Customer[] }> => {
+export const getCustomers = async (): Promise<Customer[]> => {
   try {
-    return await offlineApi.get('/carwash/customers');
-  } catch (error) {
-    if (!isOnline()) {
-      const cached = await getAllFromIndexedDB('customers');
-      return { data: cached };
-    }
-    throw error;
+    const res = await api.get('/carwash/customers');
+    return res.data;
+  } catch (err) {
+    console.warn('API failed, loading demo customers');
+    const fallback = await fetch('/demo-data/customers.json');
+    return await fallback.json();
   }
 };
 

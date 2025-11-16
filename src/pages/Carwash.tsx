@@ -18,8 +18,8 @@ export default function Carwash() {
   const [lastTransaction, setLastTransaction] = useState<any>(null);
 
   useEffect(() => {
-    getServices().then(res => setServices(res.data));
-    getCustomers().then(res => setCustomers(res.data));
+    getServices().then(res => setServices(res));
+    getCustomers().then(res => setCustomers(res));
   }, []);
 
   const handlePromoValidation = async () => {
@@ -37,7 +37,6 @@ export default function Carwash() {
     setLoading(true);
     try {
       let finalPrice = selected.price;
-      let promoCodeId = null;
 
       if (promoValidation?.valid) {
         if (promoValidation.type === 'percentage') {
@@ -45,10 +44,11 @@ export default function Carwash() {
         } else {
           finalPrice = Math.max(0, selected.price - promoValidation.discount);
         }
-        promoCodeId = promoCode;
       } else if (discount > 0) {
         finalPrice = selected.price * (1 - discount / 100);
       }
+
+      const receiptNumber = `RCP-${Date.now()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
 
       const result = await recordWash({
         serviceId: selected.id,
@@ -59,9 +59,10 @@ export default function Carwash() {
         vehicleType,
         discount: promoValidation?.valid ? promoValidation.discount : discount,
         promoCode,
-        promoCodeId,
+        promoCodeId: promoValidation?.id || null,
+        receiptNumber,
       });
-      setLastTransaction(result.data);
+      setLastTransaction({ ...result.data, receiptNumber, service: selected, customer: selectedCustomer });
       setShowReceipt(true);
       setSelected(null);
       setSelectedCustomer(null);
@@ -219,9 +220,26 @@ export default function Carwash() {
                 <p className="text-blue-700">Service: {selected.name}</p>
                 <p className="text-blue-700">Quantity: {quantity}</p>
                 <p className="text-blue-700">Vehicle: {vehicleType}</p>
-                {discount > 0 && <p className="text-blue-700">Discount: {discount}%</p>}
+                {promoValidation?.valid && (
+                  <p className="text-blue-700">
+                    Promo Discount: {promoValidation.type === 'percentage' ? `${promoValidation.discount}%` : `KES ${promoValidation.discount}`}
+                  </p>
+                )}
+                {discount > 0 && !promoValidation?.valid && <p className="text-blue-700">Additional Discount: {discount}%</p>}
                 <p className="text-blue-700 font-bold">
-                  Total: KES {((selected.price * quantity) * (1 - discount / 100)).toFixed(2)}
+                  Total: KES {(() => {
+                    let price = selected.price;
+                    if (promoValidation?.valid) {
+                      if (promoValidation.type === 'percentage') {
+                        price = selected.price * (1 - promoValidation.discount / 100);
+                      } else {
+                        price = Math.max(0, selected.price - promoValidation.discount);
+                      }
+                    } else if (discount > 0) {
+                      price = selected.price * (1 - discount / 100);
+                    }
+                    return (price * quantity).toFixed(2);
+                  })()}
                 </p>
               </div>
             )}
