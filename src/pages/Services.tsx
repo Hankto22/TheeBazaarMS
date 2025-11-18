@@ -1,12 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { loadServices, addService } from '../api/carwashService';
-
-type Service = {
-  id: number | string;
-  name: string;
-  price: number;
-  duration?: number;
-};
+import { getServices, createService, updateService } from '../services/api';
+import type { Service } from '../services/api';
 
 export default function Services() {
   const [services, setServices] = useState<Service[]>([]);
@@ -22,7 +16,7 @@ export default function Services() {
 
   const loadServicesData = async () => {
     try {
-      const data = await loadServices();
+      const data = await getServices();
       setServices(data);
     } catch (error) {
       console.error('Error loading services:', error);
@@ -34,8 +28,10 @@ export default function Services() {
   const handleAdd = async () => {
     if (!name || !price || !duration) return;
     try {
-      const updated = await addService({ name, price: Number(price), duration: Number(duration) });
-      setServices(updated);
+      await createService({ name, price: Number(price), duration: Number(duration) });
+      // Refetch services after adding
+      const data = await getServices();
+      setServices(data);
       setName('');
       setPrice('');
       setDuration('');
@@ -54,15 +50,10 @@ export default function Services() {
   const handleUpdate = async () => {
     if (!editingId || !name || !price || !duration) return;
     try {
-      const current = services.map(s =>
-        s.id === editingId
-          ? { ...s, name, price: Number(price), duration: Number(duration) }
-          : s
-      );
-      setServices(current);
-      // Update localStorage
-      const { setLocalServices } = await import('../utils/localStore');
-      setLocalServices(current as any);
+      await updateService(String(editingId), { name, price: Number(price), duration: Number(duration) });
+      // Refetch services after updating
+      const data = await getServices();
+      setServices(data);
       // Reset form
       setEditingId(null);
       setName('');

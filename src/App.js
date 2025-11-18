@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout.js';
 import DemoBanner from './components/DemoBanner.tsx';
 import IOSInstallPrompt from './components/IOSInstallPrompt.js';
+import ProtectedRoute from './components/ProtectedRoute';
 import Carwash from './pages/Carwash.tsx';
 import WashHistory from './pages/WashHistory.tsx';
 import Customers from './pages/Customers.tsx';
@@ -14,6 +15,7 @@ import Staff from './pages/Staff.tsx';
 import Settings from './pages/Settings.tsx';
 import reportWebVitals from './reportWebVitals.js';
 import { syncPendingChanges } from './api/syncService';
+import { AuthProvider } from './contexts/AuthContext';
 import './App.css';
 
 function App() {
@@ -29,23 +31,25 @@ function App() {
   }, []);
 
   return (
-    <Router>
-      <DemoBanner />
-      <IOSInstallPrompt />
-      <Layout>
-        <Routes>
-          <Route path="/" element={<Carwash />} />
-          <Route path="/history" element={<WashHistory />} />
-          <Route path="/customers" element={<Customers />} />
-          <Route path="/services" element={<Services />} />
-          <Route path="/reports" element={<Reports />} />
-          <Route path="/promos" element={<Promos />} />
-          <Route path="/inventory" element={<Inventory />} />
-          <Route path="/staff" element={<Staff />} />
-          <Route path="/settings" element={<Settings />} />
-        </Routes>
-      </Layout>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <DemoBanner />
+        <IOSInstallPrompt />
+        <Layout>
+          <Routes>
+            <Route path="/" element={<ProtectedRoute><Carwash /></ProtectedRoute>} />
+            <Route path="/history" element={<ProtectedRoute><WashHistory /></ProtectedRoute>} />
+            <Route path="/customers" element={<ProtectedRoute><Customers /></ProtectedRoute>} />
+            <Route path="/services" element={<ProtectedRoute><Services /></ProtectedRoute>} />
+            <Route path="/reports" element={<ProtectedRoute requiredRole="admin"><Reports /></ProtectedRoute>} />
+            <Route path="/promos" element={<ProtectedRoute requiredRole="admin"><Promos /></ProtectedRoute>} />
+            <Route path="/inventory" element={<ProtectedRoute requiredRole="admin"><Inventory /></ProtectedRoute>} />
+            <Route path="/staff" element={<Staff />} />
+            <Route path="/settings" element={<ProtectedRoute requiredRole="admin"><Settings /></ProtectedRoute>} />
+          </Routes>
+        </Layout>
+      </Router>
+    </AuthProvider>
   );
 }
 

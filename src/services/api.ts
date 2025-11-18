@@ -120,7 +120,16 @@ export interface Reports {
 }
 
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8080',
+  baseURL: process.env.REACT_APP_API_BASE || 'http://localhost:8080',
+});
+
+// Add auth token to requests
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('authToken');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
 });
 
 // Initialize IndexedDB
@@ -129,6 +138,20 @@ initDB();
 // Use raw API instance to ensure baseURL works correctly
 const offlineApi = api;
 
+// Offline-aware API functions
+export const getDashboard = async (): Promise<{ services: Service[]; customers: Customer[]; stats: { totalTransactions: number; totalRevenue: number } }> => {
+  try {
+    const res = await api.get('/carwash');
+    return res.data;
+  } catch (err) {
+    console.warn('API failed, loading demo data');
+    const servicesFallback = await fetch('/demo-data/services.json');
+    const customersFallback = await fetch('/demo-data/customers.json');
+    const services = await servicesFallback.json();
+    const customers = await customersFallback.json();
+    return { services, customers, stats: { totalTransactions: 0, totalRevenue: 0 } };
+  }
+};
 // Offline-aware API functions
 export const getServices = async (): Promise<Service[]> => {
   try {

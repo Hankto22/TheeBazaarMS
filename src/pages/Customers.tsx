@@ -1,13 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { loadCustomers, addCustomer } from '../api/carwashService';
-
-type Customer = {
-  id: number | string;
-  name: string;
-  phone: string;
-  loyaltyPoints?: number;
-  loyaltyTier?: string;
-};
+import { getCustomers, createCustomer } from '../services/api';
+import type { Customer } from '../services/api';
 
 export default function Customers() {
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -21,7 +14,7 @@ export default function Customers() {
 
   const loadCustomersData = async () => {
     try {
-      const data = await loadCustomers();
+      const data = await getCustomers();
       setCustomers(data);
     } catch (error) {
       console.error('Error loading customers:', error);
@@ -33,8 +26,10 @@ export default function Customers() {
   const handleAdd = async () => {
     if (!name || !phone) return;
     try {
-      const updated = await addCustomer({ name, phone });
-      setCustomers(updated);
+      await createCustomer({ name, phone, loyaltyPoints: 0, loyaltyTier: 'Bronze' });
+      // Refetch customers after adding
+      const data = await getCustomers();
+      setCustomers(data);
       setName('');
       setPhone('');
     } catch (error) {

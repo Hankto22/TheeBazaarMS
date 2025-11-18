@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getServices, recordWash, getCustomers, validatePromoCode } from '../services/api';
+import { getDashboard, recordWash, validatePromoCode } from '../services/api';
 import ReceiptModal from '../components/ReceiptModal';
 
 export default function Carwash() {
@@ -18,8 +18,10 @@ export default function Carwash() {
   const [lastTransaction, setLastTransaction] = useState<any>(null);
 
   useEffect(() => {
-    getServices().then(res => setServices(res));
-    getCustomers().then(res => setCustomers(res));
+    getDashboard().then(res => {
+      setServices(res.services);
+      setCustomers(res.customers);
+    });
   }, []);
 
   const handlePromoValidation = async () => {

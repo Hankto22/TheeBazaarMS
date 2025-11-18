@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { getStaff, createStaff, updateStaff, staffLogin, startShift, endShift } from '../services/api';
+import { getStaff, createStaff, updateStaff, startShift, endShift } from '../services/api';
 import type { Staff } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Staff() {
+  const { user, login, logout, isAuthenticated } = useAuth();
   const [staff, setStaff] = useState<Staff[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingStaff, setEditingStaff] = useState<Staff | null>(null);
-  const [showLoginForm, setShowLoginForm] = useState(false);
-  const [currentUser, setCurrentUser] = useState<Staff | null>(null);
+  const [showLoginForm, setShowLoginForm] = useState(!isAuthenticated);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -67,14 +68,13 @@ export default function Staff() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const result = await staffLogin(loginData);
-      if (result.data.success) {
-        setCurrentUser(result.data.staff);
+      const success = await login(loginData.email, loginData.password);
+      if (success) {
         setShowLoginForm(false);
         setLoginData({ email: '', password: '' });
         loadStaff(); // Refresh to show updated shift info
       } else {
-        alert(result.data.message);
+        alert('Invalid credentials');
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -83,9 +83,9 @@ export default function Staff() {
   };
 
   const handleStartShift = async () => {
-    if (!currentUser) return;
+    if (!user) return;
     try {
-      await startShift({ staffId: currentUser.id });
+      await startShift({ staffId: user.id });
       loadStaff();
     } catch (error) {
       console.error('Error starting shift:', error);
@@ -133,7 +133,7 @@ export default function Staff() {
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-gray-800">👥 Staff Management & Performance</h2>
         <div className="flex space-x-3">
-          {!currentUser && (
+          {!isAuthenticated && (
             <button
               onClick={() => setShowLoginForm(true)}
               className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors"
@@ -150,12 +150,12 @@ export default function Staff() {
         </div>
       </div>
 
-      {currentUser && (
+      {isAuthenticated && user && (
         <div className="bg-green-50 border border-green-200 rounded-md p-4 mb-6">
           <div className="flex justify-between items-center">
             <div>
-              <h3 className="text-green-800 font-semibold">Logged in as: {currentUser.name}</h3>
-              <p className="text-green-600">Role: {currentUser.role}</p>
+              <h3 className="text-green-800 font-semibold">Logged in as: {user.name}</h3>
+              <p className="text-green-600">Role: {user.role}</p>
             </div>
             <div className="flex space-x-2">
               <button
@@ -165,7 +165,7 @@ export default function Staff() {
                 Start Shift
               </button>
               <button
-                onClick={() => setCurrentUser(null)}
+                onClick={logout}
                 className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors"
               >
                 Logout
